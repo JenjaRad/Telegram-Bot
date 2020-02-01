@@ -12,8 +12,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import sun.misc.Unsafe;
 
 
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -119,7 +121,7 @@ public class Bot extends TelegramLongPollingBot {
                     .sorted(Comparator.comparing(PhotoSize::getFileSize).reversed())
                     .findFirst()
                     .orElse(null).getHeight();
-            String title = "file_id: " + fileId + "\nwidth: " + Integer.toString(fileWidth) + "\nheight: " + Integer.toString(fileHeight);
+            String title = "file_id: " + fileId + "\nwidth: " + fileWidth + "\nheight: " + fileHeight;
             SendPhoto message = new SendPhoto()
                     .setChatId(chatId)
                     .setPhoto(fileId)
@@ -130,6 +132,7 @@ public class Bot extends TelegramLongPollingBot {
     private String findTrainer(String argument) {
         final String DATA_DRIVER = "org.sqlite.JDBC";
         final String DATA_URL = "jdbc:sqlite:D:/123/Fitness_DB.db";
+        List<Integer> listId = new ArrayList<>();
         String result = "";
         try {
             Class.forName(DATA_DRIVER);
@@ -141,7 +144,15 @@ public class Bot extends TelegramLongPollingBot {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("Select * from Users where name like '%" + argument.trim() + "%'");
             while (resultSet.next() == true) {
-                result += resultSet.getString(2);
+                result += "ID : " + resultSet.getInt(1) + resultSet.getString(3) + resultSet.getString(2) + "\n";
+                listId.add(resultSet.getInt(1));
+            }
+            for (Integer temp : listId) {
+                ResultSet coachSchedule = statement.executeQuery("Select * from Schedule where id = " + temp.toString());
+                while (coachSchedule.next() == true) {
+                    result += "ID : " + coachSchedule.getInt(1) + "name" + coachSchedule.getTimestamp(3) + "\n";
+                }
+
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -149,7 +160,7 @@ public class Bot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
 
-        return result.isEmpty() ? "К сожалению,такого тренера не сущевствует" : "Ваш тренер найден";
+        return result.isEmpty() ? "К сожалению,такого тренера не сущевствует" : result;
     }
 
 
@@ -169,6 +180,17 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setKeyboard(keyboardRow);
 
     }
+//    public static void disableWarning() {
+//        try {
+//            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe"); theUnsafe.setAccessible(true);
+//            Unsafe u = (Unsafe) theUnsafe.get(null);
+//            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
+//            Field logger = cls.getDeclaredField("logger");
+//            u.putObjectVolatile(cls, u.staticFieldOffset(logger), null);
+//        } catch (Exception e) {
+//
+//        }
+//    }
 
 
     @Override

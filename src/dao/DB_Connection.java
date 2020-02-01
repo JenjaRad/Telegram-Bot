@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 public class DB_Connection {
     static final String DATA_DRIVER = "org.sqlite.JDBC";
-    static final String DATA_URL = "jdbc:sqlite:D:/123/Fitness_DB.db";
+    static final String DATA_URL = "jdbc:sqlite:D:/Fitness_DB.db";
 
     private DB_Connection() {
     }
